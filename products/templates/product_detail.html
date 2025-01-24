@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 bg-white shadow-md rounded-lg">
+    
+    <!-- Product Details -->
+    <h2 class="text-2xl font-bold text-gray-800">{{ product.brand }} - {{ product.name }}</h2>
+    <p class="text-gray-700"><strong>Label:</strong> {{ product.label }}</p>
+    <p class="text-lg text-blue-600 font-semibold"><strong>Price:</strong> ${{ product.price }}</p>
+    <p class="text-gray-700"><strong>Ingredients:</strong> {{ product.ingredients }}</p>
+    
+    <!-- Skin Types -->
+    <p class="text-gray-700"><strong>Suitable for:</strong>
+        {% if product.combination %} Combination {% endif %}
+        {% if product.dry %} Dry {% endif %}
+        {% if product.normal %} Normal {% endif %}
+        {% if product.oily %} Oily {% endif %}
+        {% if product.sensitive %} Sensitive {% endif %}
+    </p>
+
+    <!-- Ratings & Reviews -->
+    <div class="mt-6">
+        <h3 class="text-xl font-semibold">Ratings & Reviews</h3>
+        <p class="text-gray-700"><strong>Average Rating:</strong> {{ product.average_rating }}/5 ⭐ ({{ product.total_ratings }} reviews)</p>
+    </div>
+
+    <!-- Recent Comments -->
+    <div class="mt-4">
+        <h4 class="text-lg font-semibold">Recent Comments</h4>
+        {% for comment in product.recent_comments %}
+            <div class="border-b border-gray-300 py-2">
+                <p class="font-semibold">{{ comment.user.username }} <span class="text-gray-500 text-sm">- {{ comment.timestamp|date:"M d, Y" }}</span></p>
+                <p class="text-gray-700">{{ comment.comment }}</p>
+            </div>
+        {% empty %}
+            <p class="text-gray-500">No comments yet. Be the first to review!</p>
+        {% endfor %}
+    </div>
+
+    <!-- Leave a Review Form -->
+    {% if user.is_authenticated %}
+        <div class="mt-6 p-4 border rounded-md bg-gray-100">
+            <h3 class="text-lg font-semibold">Leave a Review</h3>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                
+                <label class="block text-gray-700 font-semibold">Rating:</label>
+                <div class="flex space-x-2">
+                    {{ form.rating }}
+                </div>
+
+                <label class="block text-gray-700 font-semibold">Comment:</label>
+                <textarea name="comment" rows="3" class="w-full p-2 border rounded-md">{{ form.comment.value|default_if_none:'' }}</textarea>
+
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Submit Review</button>
+            </form>
+        </div>
+    {% else %}
+        <p class="mt-4 text-gray-500"><a href="{% url 'login' %}" class="text-blue-600 font-semibold hover:underline">Login</a> to leave a review.</p>
+    {% endif %}
+</div>
+{% endblock %}

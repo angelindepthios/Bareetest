@@ -1,0 +1,67 @@
+<a href="{% url 'product_detail' product.pk %}" class="block">
+  <div class="card-product bg-white shadow-lg rounded-xl p-4 mb-6 border border-[#B8E2F2] transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl h-[450px] flex flex-col justify-between">
+    
+    <!-- Bagian Header: Brand & Label -->
+    <div class="flex justify-between items-center mb-2">
+      <h3 class="text-xl font-bold text-[#77C3EC]">{{ product.brand }}</h3>
+      <span class="inline-block bg-[#B8E2F2] text-[#014791] font-bold text-xs px-2 py-1 rounded-lg">
+        {{ product.label }}
+      </span>
+    </div>
+
+    <!-- Nama Produk -->
+    <h4 class="text-lg font-medium text-gray-800">{{ product.name }}</h4>
+
+    <!-- Deskripsi Singkat (Ingredients) -->
+    <p class="text-gray-500 text-sm line-clamp-3">
+      {{ product.ingredients|slice:":50" }}{% if product.ingredients|length > 50 %}...{% endif %}
+    </p>
+
+    <!-- Harga Produk -->
+    <div class="mt-4">
+      <span class="text-[#77C3EC] font-bold">$ {{ product.price }}</span>
+    </div>
+
+    <!-- Rating Produk -->
+    <div class="mt-4 flex items-center space-x-1 mb-1">
+      <span class="text-lg text-[#FFD700]">★</span>
+      <span class="text-gray-700 font-semibold">{{ product.average_rating|default:"0.0" }}</span>
+      <span class="text-gray-500 text-sm">({{ product.total_ratings|default:"0" }} ratings)</span>
+    </div>
+
+    <!-- Skin Type yang Cocok -->
+    <div class="mt-2 text-sm text-gray-600">
+      <strong>Suitable for:</strong>
+      {% if product.combination %} <span class="bg-pink-200 text-pink-800 px-2 py-1 rounded-lg">Combination</span> {% endif %}
+      {% if product.dry %} <span class="bg-blue-200 text-blue-800 px-2 py-1 rounded-lg">Dry</span> {% endif %}
+      {% if product.normal %} <span class="bg-green-200 text-green-800 px-2 py-1 rounded-lg">Normal</span> {% endif %}
+      {% if product.oily %} <span class="bg-yellow-200 text-yellow-800 px-2 py-1 rounded-lg">Oily</span> {% endif %}
+      {% if product.sensitive %} <span class="bg-red-200 text-red-800 px-2 py-1 rounded-lg">Sensitive</span> {% endif %}
+    </div>
+
+    <!-- Recent Comments -->
+    <div class="mt-4 border-t pt-2">
+      <h5 class="text-sm font-semibold text-gray-700">Recent Comments:</h5>
+      {% for comment in product.recent_comments %}
+        <p class="text-xs text-gray-500">"{{ comment.comment|slice:":50" }}{% if comment.comment|length > 50 %}...{% endif %}" 
+        - {{ comment.user.username }}</p>
+      {% empty %}
+        <p class="text-xs text-gray-400 italic">No comments yet.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Wishlist Button ❤️ -->
+    <div class="mt-4 flex justify-end">
+      <button id="likeButton_{{ product.pk }}" class="love-button {% if product.pk in user_choices %}liked{% endif %}" 
+              onclick="toggleWishlist('{{ product.pk }}', {% if product.pk in user_choices %}true{% else %}false{% endif %})">
+        <svg id="heartIcon_{{ product.pk }}" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" 
+             fill="{% if product.pk in user_choices %}#E0245E{% else %}none{% endif %}" viewBox="0 0 24 24" stroke="#E0245E">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</a>
+
