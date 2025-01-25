@@ -1,11 +1,11 @@
-import datetime
+import datetime, pytz
 from .forms import UserRegistForm, UserLoginForm
-# from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout
-# from django.contrib.auth.decorators import login_required
-# from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 def register_user(request):
     if request.method == 'POST':
@@ -24,20 +24,26 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            
-            # Set cookie untuk 'last_login'
-            response = redirect('product_list')
-            response.set_cookie('last_login', str(datetime.datetime.now()))
+
+            # Convert UTC time to local timezone (e.g., 'Asia/Jakarta')
+            local_tz = pytz.timezone('Asia/Jakarta')
+            local_time = datetime.datetime.now().astimezone(local_tz)
+
+            # Redirect to the last visited page
+            next_url = request.GET.get('next') or request.POST.get('next') or 'product_list'
+            response = redirect(next_url)
+
+            # Store the correct timezone-based datetime in cookie
+            response.set_cookie('last_login', str(local_time.strftime('%Y-%m-%d %H:%M:%S %Z')))
 
             return response
 
         else:
-            # Jika login gagal
             messages.error(request, "Invalid username or password. Please try again.")
     else:
         form = UserLoginForm()
 
-    context = {'form': form}
+    context = {'form': form, 'next': request.GET.get('next', '')}
     return render(request, 'login.html', context)
 
 def logout_user(request):

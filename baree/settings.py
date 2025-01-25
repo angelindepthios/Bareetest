@@ -133,3 +133,6 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+TIME_ZONE = 'Asia/Jakarta'
+USE_TZ = True 

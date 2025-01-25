@@ -1,9 +1,11 @@
 from django import forms
-from .models import Rating, Comment
+from .models import RatingComment
 
 class RatingCommentForm(forms.ModelForm):
     class Meta:
-        model = Rating
-        fields = ["rating"]
-        labels = {"rating": "Rating"}
-        help_texts = {"rating": "Rate this product from 1 to 5 stars."}
+        model = RatingComment
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.RadioSelect(choices=RatingComment.RATING_CHOICES),
+            'comment': forms.Textarea(attrs={'class': 'w-full p-2 border rounded-md', 'rows': 3}),
+        }

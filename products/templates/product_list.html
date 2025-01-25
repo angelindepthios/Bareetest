@@ -4,16 +4,153 @@
 {% block content %}
 <div class="container mx-auto p-6">
     <h1 class="text-3xl font-bold text-center text-[#27144b] mb-6">All Products</h1>
+
+    <!-- Search and Filter Bar -->
+    <div class="flex justify-center gap-4 mb-6">
+        <form method="GET" action="{% url 'product_list' %}" class="flex">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query|default:'' }}" 
+                placeholder="Search products..." 
+                class="border border-gray-300 p-2 rounded-l w-[300px]"
+            />
+            <button 
+                type="submit" 
+                class="bg-[#daecff] text-[#4f6272] px-4 py-2 rounded-r"
+            >
+                Search
+            </button>
+        </form>
+        
+        <!-- Open Modal Button -->
+        <button 
+            onclick="openModal()" 
+            class="bg-[#abd4fe] text-white px-4 py-2 rounded"
+        >
+            Filters
+        </button>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filterModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded shadow-lg w-96 relative">
+            
+            <!-- Close Button (X) in Top Right -->
+            <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-black text-xl">
+                &times;
+            </button>
+
+            <h2 class="text-xl font-bold mb-4">Filter Products</h2>
+            
+            <form id="filterForm" method="GET" action="{% url 'product_list' %}">
+                
+                <label class="block">Brand:</label>
+                <select name="brand" class="border w-full p-2 mb-2">
+                    <option value="">-- Select Brand --</option>
+                    {% for b in unique_brands %}
+                        <option value="{{ b }}" {% if selected_brand == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+
+                <label class="block">Category:</label>
+                <select name="label" class="border w-full p-2 mb-2">
+                    <option value="">-- Select Label --</option>
+                    {% for l in unique_labels %}
+                        <option value="{{ l }}" {% if selected_label == l %}selected{% endif %}>{{ l }}</option>
+                    {% endfor %}
+                </select>
+
+                <label class="block">Skin Type:</label>
+                <select name="skintype" class="border w-full p-2 mb-2">
+                    <option value="">-- Select Skin Type --</option>
+                    <option value="dry" {% if selected_skintype == "dry" %}selected{% endif %}>Dry</option>
+                    <option value="normal" {% if selected_skintype == "normal" %}selected{% endif %}>Normal</option>
+                    <option value="oily" {% if selected_skintype == "oily" %}selected{% endif %}>Oily</option>
+                    <option value="combination" {% if selected_skintype == "combination" %}selected{% endif %}>Combination</option>
+                    <option value="sensitive" {% if selected_skintype == "sensitive" %}selected{% endif %}>Sensitive</option>
+                </select>
+
+                <label class="block">Price Range:</label>
+                <div class="flex gap-2">
+                    <input type="number" name="min_price" placeholder="Min" value="{{ min_price|default:'' }}" class="border w-1/2 p-2">
+                    <input type="number" name="max_price" placeholder="Max" value="{{ max_price|default:'' }}" class="border w-1/2 p-2">
+                </div>
+
+                <label class="block">Minimum Rating:</label>
+                <input type="number" name="min_rating" step="0.1" min="0" max="5" value="{{ min_rating|default:'' }}" class="border w-full p-2 mb-4">
+                
+                <div class="flex justify-between mt-4">
+                    <button type="submit" class="bg-[#27144b] text-white px-4 py-2 rounded">Apply Filters</button>
+                    
+                    <!-- Clear Filters Button (Resets to all products) -->
+                    <a href="{% url 'product_list' %}" class="bg-gray-400 text-white px-4 py-2 rounded">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
     
+    <!-- Product Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {% for product in products %}
-          <div class="min-h-[500px] flex">
-              {% include 'card_product.html' with product=product %}
-          </div>
-      {% empty %}
-          <p class="col-span-full text-center text-gray-500">No products available.</p>
-      {% endfor %}
-  </div>
-  
+        {% for product in products %}
+            <div class="min-h-[500px] flex">
+                {% include 'card_product.html' with product=product %}
+            </div>
+        {% empty %}
+            <p class="col-span-full text-center text-gray-500">No products available.</p>
+        {% endfor %}
+    </div>
 </div>
+
+<!-- Modal JavaScript -->
+<script>
+    function closeModal() {
+        let modal = document.getElementById("filterModal");
+        modal.classList.add("hidden");
+        modal.style.display = "none"; // Ensure it gets hidden
+        document.body.style.overflow = "auto";
+    }
+
+    function openModal() {
+        let modal = document.getElementById("filterModal");
+        modal.classList.remove("hidden");
+        modal.style.display = "flex"; // Show the modal properly
+        document.body.style.overflow = "hidden";
+    }
+
+    // Ensure modal is properly hidden on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        closeModal();
+    });
+
+    // Close modal when clicking outside of it
+    window.onclick = function (event) {
+        let modal = document.getElementById("filterModal");
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+</script>
+
+
+<style>
+   #filterModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+</style>
 {% endblock %}
