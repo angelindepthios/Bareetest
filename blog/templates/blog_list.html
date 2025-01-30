@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+{% load static %}
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-[#004080] text-center mb-6">Blog Posts</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for blog in blogs %}
+        <a href="{% url 'blog_detail' blog.id %}" class="block">
+            <div>
+                <!-- Blog Thumbnail -->
+                {% if blog.image %}
+                    <img src="{{ blog.image.url }}" alt="{{ blog.title }}" class="w-full h-52 object-cover rounded-lg mb-3">
+                {% else %}
+                    <img src="{% static 'image/default_blog.jpg' %}" alt="{{ blog.title }}" class="w-full h-52 object-cover rounded-lg mb-3">
+                {% endif %}
+
+                <!-- Blog Category & Date -->
+                <p class="text-xs text-[#d00] font-semibold uppercase"> {{ blog.category }}</p>
+                <p class="text-xs text-gray-500">Created at {{ blog.created_at|date:"F d, Y" }}</p>
+
+                <!-- Blog Title -->
+                <h3 class="text-lg font-bold text-gray-900 leading-tight mt-1">
+                    {{ blog.title }}
+                </h3>
+
+                <!-- Author Name -->
+                <p class="text-sm text-gray-600 mt-1">by <span class="font-semibold">{{ blog.author.username }}</span></p>
+
+                <!-- Likes and Comments Count -->
+                <div class="flex items-center mt-2 text-gray-600 text-sm space-x-4">
+                    <span>❤️ {{ blog.total_likes }}</span>
+                    <span>💬 {{ blog.total_comments }}</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+            <div class="flex items-center justify-center h-64">
+                <p class="text-center text-gray-500 text-lg">No blog posts found.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

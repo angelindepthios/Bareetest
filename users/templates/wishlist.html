@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="max-w-5xl mx-auto px-6 py-8">
+    <h1 class="text-3xl font-semibold text-center text-[#014791] mb-6">Your Wishlist</h1>
+
+    {% if wishlist_items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for wishlist_item in wishlist_items %}
+                {% include 'card_product.html' with product=wishlist_item.product %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500 text-center mt-6">Your wishlist is empty. Start adding products you love!</p>
+    {% endif %}
+</div>
+
+{% endblock %}

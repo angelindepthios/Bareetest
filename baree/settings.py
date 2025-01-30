@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main',
     'products',
     'users',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -65,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -136,3 +138,8 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 TIME_ZONE = 'Asia/Jakarta'
 USE_TZ = True 
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

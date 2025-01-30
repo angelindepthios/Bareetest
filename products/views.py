@@ -8,20 +8,7 @@ from .forms import RatingCommentForm
 import os
 import json
 from django.conf import settings
-
-import os
-import json
-from django.conf import settings
-from django.shortcuts import render
 from django.db.models import Q
-from .models import Product
-
-import os
-import json
-from django.conf import settings
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Product
 
 def product_list(request):
     """Display all products, initialize database if empty, and allow searching & filtering."""
@@ -120,6 +107,7 @@ def product_detail(request, pk):
 
 
 @login_required(login_url='/login/')
+@csrf_exempt
 def submit_review(request, pk):
     """Handle form submission for ratings & comments."""
     product = get_object_or_404(Product, pk=pk)
@@ -131,7 +119,14 @@ def submit_review(request, pk):
             review.product = product
             review.user = request.user
             review.save()
-            return JsonResponse({"message": "Review submitted successfully!"}, status=201)
+            return JsonResponse({
+                "message": "Review submitted successfully!",
+                "username": request.user.username,
+                "rating": review.rating,
+                "comment": review.comment,
+                "timestamp": review.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            }, status=201)
+        return JsonResponse({"errors": form.errors}, status=400)
 
     return JsonResponse({"error": "Invalid submission"}, status=400)
 
@@ -198,3 +193,21 @@ def wishlist_list(request):
     ]
 
     return JsonResponse({"wishlist": data}, safe=False)
+
+def get_reviews(request, pk):
+    """Fetch all reviews for a product."""
+    product = Product.objects.get(pk=pk)
+    reviews = RatingComment.objects.filter(product=product).order_by("-timestamp")
+
+    reviews_data = [
+        {
+            "username": review.user.username,
+            "skintype" : review.user.skintype,
+            "rating": review.rating,
+            "comment": review.comment,
+            "timestamp": review.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for review in reviews
+    ]
+
+    return JsonResponse({"reviews": reviews_data})

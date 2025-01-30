@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-8 py-8 bg-[#f6faff] shadow-md rounded-lg mb-8">
-    
+{% include 'navbar.html' %}
+<div class="mb-10"></div>
+
+<div class="max-w-4xl mx-auto px-6 py-8 bg-[#f6faff] shadow-md rounded-lg mb-8">
     <!-- Product Details -->
     <div class="flex justify-between items-center">
         <!-- Title -->
@@ -117,12 +119,13 @@
 
             <label class="block text-[#3a3d46] font-semibold mt-3">Comment:</label>
             <textarea name="comment" rows="3" class="w-full p-2 border border-[#b5d9fe] rounded-md bg-[#ffffff]"></textarea>
-
             <div class="text-right">
                 <button type="submit" id="submitReviewBtn" class="px-4 py-2 bg-[#abd4fe] text-[#3a3d46] font-semibold rounded-md hover:bg-[#b5d9fe]">
                     Submit Review
                 </button>
             </div>
+            <p id="success-message" class="text-green-500 mt-4 hidden">Review submitted successfully!</p>
+            <p id="error-message" class="text-red-500 mt-4 hidden">Invalid submission. Please try again.</p>
         </form>
     </div>
 </div>
@@ -148,19 +151,53 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const reviewForm = document.getElementById("reviewForm");
-        const submitButton = document.getElementById("submitReviewBtn");
+        const reviewSection = document.getElementById("reviewSection");
 
-        // Pass Django authentication status to JavaScript
+        // Check authentication status from Django
         const isUserAuthenticated = "{{ user.is_authenticated }}" === "True";
 
-        if (!isUserAuthenticated) {
-            // If user is not logged in, redirect on submit
-            reviewForm.addEventListener("submit", function (event) {
-                event.preventDefault();  // Prevent form from submitting
-                window.location.href = "{% url 'login' %}?next={{ request.path }}";  // Redirect to login with return URL
+        reviewForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (!isUserAuthenticated) {
+                // Redirect to login if user is not authenticated
+                window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                return;
+            }
+
+            // Get the CSRF token from the form
+            const csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            // Prepare form data
+            const formData = new FormData(reviewForm);
+
+            // Submit review via AJAX
+            fetch("{% url 'submit_review' pk=product.pk %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    location.reload();
+                    // Show success message
+                    document.getElementById("success-message").textContent = "Review submitted successfully!";
+                    document.getElementById("success-message").classList.remove("hidden");
+                } else if (data.errors) {
+                    document.getElementById("error-message").textContent = "Failed to submit review!";
+                    document.getElementById("error-message").classList.remove("hidden");
+                }
+            })
+            .catch(() => {
+                document.getElementById("error-message").classList.remove("hidden");
             });
-        }
+        });
+
     });
+
     document.addEventListener("DOMContentLoaded", function () {
         const stars = document.querySelectorAll("#star-rating span");
         const ratingInput = document.getElementById("selected-rating");
@@ -212,6 +249,8 @@
                 
                 if (confirm("Are you sure you want to delete this review?")) {
                     deleteForm.submit();
+                    document.getElementById("success-message").textContent = "Review deleted successfully!";
+                    document.getElementById("success-message").classList.remove("hidden");
                 }
             });
         });
@@ -253,8 +292,12 @@
                     const heartIcon = document.getElementById(`heartIcon_${productId}`);
                     if (data.in_wishlist) {
                         heartIcon.setAttribute("fill", "#E0245E");  // Filled heart (added to wishlist)
+                        document.getElementById('success-message').textContent = 'Product successfully added to wishlist!';
+                        document.getElementById('success-message').classList.remove('hidden');
                     } else {
                         heartIcon.setAttribute("fill", "none");  // Empty heart (removed from wishlist)
+                        document.getElementById('success-message').textContent = 'Product removed from wishlist!';
+                        document.getElementById('success-message').classList.remove('hidden');
                     }
                 }
             })

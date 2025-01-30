@@ -7,7 +7,9 @@ class UserRegistForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
     confirm_password = forms.CharField(widget=forms.PasswordInput, required=True)
     full_name = forms.CharField(max_length=100, required=True)
-    age = forms.IntegerField(required=True)
+    birth_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}), required=True
+    )  # Mengganti age menjadi birth_date dengan widget date picker
     gender = forms.ChoiceField(choices=[
         ('male', 'Male'), 
         ('female', 'Female'), 
@@ -20,10 +22,11 @@ class UserRegistForm(forms.ModelForm):
         ('dry', 'Dry'), 
         ('sensitive', 'Sensitive')
     ], required=True)
+    profile_photo = forms.ImageField(required=False)  # Menggunakan ImageField untuk upload foto
 
     class Meta:
         model = CustomUser
-        fields = ['full_name', 'email', 'age', 'gender', 'phone_number', 'skintype', 'username']
+        fields = ['full_name', 'email', 'birth_date', 'gender', 'phone_number', 'skintype', 'profile_photo', 'username']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -31,7 +34,7 @@ class UserRegistForm(forms.ModelForm):
         confirm_password = cleaned_data.get('confirm_password')
 
         if password != confirm_password:
-            self.add_error('confirm_password', "Passwords do not match.")  # Tambahkan error ke field confirm_password
+            self.add_error('confirm_password', "Passwords do not match.")  
         return cleaned_data
 
     def save(self, commit=True):
@@ -40,7 +43,6 @@ class UserRegistForm(forms.ModelForm):
         if commit:
             user.save()
         return user
-
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(max_length=100, required=True)

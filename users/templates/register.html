@@ -14,7 +14,7 @@
       <h2 class="mt-0 text-center text-2xl font-semibold text-[#017491]">Create your account</h2>
     </div>
     
-    <form class="mt-8 space-y-6" method="POST">
+    <form class="mt-8 space-y-6" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="remember" value="true">
 
@@ -25,7 +25,11 @@
               {{ field.label }}
             </label>
             <div class="relative">
-              {% if field.field.widget.input_type == "select" %}
+              {% if field.name == "birth_date" %}
+                <!-- Custom Birth Date Field with Date Picker -->
+                <input type="date" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default_if_none:'' }}"
+                  class="mt-1 block w-full px-4 py-2 text-gray-700 bg-white border border-[#89CFF0] rounded-md shadow-sm focus:ring-[#77C3EC] focus:border-[#77C3EC]">
+              {% elif field.field.widget.input_type == "select" %}
                 <!-- Dropdown for Gender & Skintype -->
                 <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="mt-1 block w-full px-4 py-2 text-gray-700 bg-white border border-[#89CFF0] rounded-md shadow-sm focus:ring-[#77C3EC] focus:border-[#77C3EC]">
                   {% for option in field.field.choices %}

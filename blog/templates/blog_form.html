@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="max-w-3xl mx-auto px-6 py-8 mt-12 bg-gradient-to-b from-[#abd4fe] to-[#f6faff] shadow-lg rounded-lg">
+
+    <!-- Page Header -->
+    <h1 class="text-3xl font-bold text-[#004080] text-center mb-6">
+        {% if form.instance.pk %} Edit{% else %} Create{% endif %} Blog Post
+    </h1>
+
+    <!-- Blog Form -->
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Title Field -->
+        <div>
+            <label class="block text-[#004080] font-semibold mb-2">Title</label>
+            <input type="text" name="{{ form.title.name }}" value="{{ form.title.value|default_if_none:'' }}"
+                class="w-full p-3 border border-[#b5d9fe] rounded-lg bg-gradient-to-b from-[#e3f1ff] to-[#f6faff] focus:outline-none focus:ring-2 focus:ring-[#004080] shadow-sm" 
+                placeholder="Enter your blog title here..." required>
+        </div>
+
+        <!-- Content Field -->
+        <div>
+            <label class="block text-[#004080] font-semibold mb-2">Content</label>
+            <textarea name="{{ form.content.name }}" rows="8"
+                class="w-full p-4 border border-[#b5d9fe] rounded-lg bg-gradient-to-b from-[#e3f1ff] to-[#f6faff] focus:outline-none focus:ring-2 focus:ring-[#004080] shadow-sm resize-none"
+                placeholder="Write your blog content here...">{{ form.content.value|default_if_none:'' }}</textarea>
+        </div>
+
+        <!-- Image Upload -->
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Upload Image</label>
+            <div class="bg-white border border-gray-300 rounded-lg p-2">
+                {{ form.image }}
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+            class="w-full bg-[#004080] text-white px-4 py-2 rounded-lg font-bold transition hover:bg-[#0066cc] shadow-md">
+            Save Post
+        </button>
+    </form>
+
+    <!-- Back to Blog List -->
+    <div class="mt-6 text-center">
+        <a href="{% url 'blog_list' %}" class="text-[#004080] font-semibold hover:underline text-sm">
+            ← Back to Blog List
+        </a>
+    </div>
+
+</div>
+
+<div class="mb-20"></div>
+{% endblock %}
